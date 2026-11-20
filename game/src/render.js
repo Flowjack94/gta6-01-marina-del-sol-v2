@@ -1,0 +1,13 @@
+import {WORLD,drawCity} from './city.js';
+import {drawCar} from './vehicles.js';
+import {drawPlayer} from './player.js';
+import {drawHud} from './hud.js';
+export function render(c,s){const ctx=c.getContext('2d');ctx.clearRect(0,0,c.width,c.height);const cam=s.camera;ctx.save();ctx.translate(-cam.x,-cam.y);
+ drawCity(ctx,s.time);for(const e of s.effects){ctx.save();ctx.globalAlpha=Math.max(0,e.life/45);if(e.type==='skid'){ctx.fillStyle='#293333';ctx.fillRect(e.x-14,e.y,20,3)}else if(e.type==='smoke'){ctx.fillStyle='#d0d2c7';ctx.beginPath();ctx.arc(e.x,e.y,5+(45-e.life)*.12,0,7);ctx.fill()}else if(e.type==='flash'){ctx.fillStyle='#fff29b';ctx.beginPath();ctx.arc(e.x,e.y,8,0,7);ctx.fill()}else{ctx.fillStyle=e.type==='spark'?'#ffe39a':'#e8bf82';ctx.beginPath();ctx.arc(e.x,e.y,3,0,7);ctx.fill()}ctx.restore()}
+ for(const p of s.peds)drawPed(ctx,p);for(const cop of s.cops||[])drawCop(ctx,cop);for(const thug of s.thugs||[])drawThug(ctx,thug);for(const car of s.cars)drawCar(ctx,car);if(!s.player.carId)drawPlayer(ctx,s.player);
+ const target=s.gigTarget||s.missionTarget;if(target){const pulse=8+Math.sin(s.time*.09)*3;ctx.strokeStyle=s.gigTarget?'#b7ec86':'#ffda78';ctx.lineWidth=4;ctx.beginPath();ctx.arc(target.x,target.y,pulse,0,7);ctx.stroke();ctx.fillStyle='#fff3c6';ctx.beginPath();ctx.arc(target.x,target.y,4,0,7);ctx.fill()}
+ ctx.restore();const night=(Math.sin(s.time*.00006)+1)/2;ctx.fillStyle=`rgba(23,43,79,${Math.max(0,night-.76)*.38})`;ctx.fillRect(0,0,c.width,c.height);ctx.fillStyle=`rgba(255,177,103,${.018+Math.max(0,.45-night)*.06})`;ctx.fillRect(0,0,c.width,c.height);if(s.shake>0){ctx.translate((Math.random()-.5)*s.shake,(Math.random()-.5)*s.shake);s.shake*=.8}drawHud(ctx,s);
+}
+function drawPed(c,p){c.save();c.translate(p.x,p.y);c.fillStyle='#24333a55';c.beginPath();c.ellipse(0,4,8,5,0,0,7);c.fill();c.fillStyle=p.color;c.beginPath();c.ellipse(0,1,6,9,0,0,7);c.fill();c.fillStyle='#f0bd91';c.beginPath();c.arc(0,-7,4,0,7);c.fill();c.restore()}
+function drawThug(c,p){c.save();c.translate(p.x,p.y);c.rotate(p.a||0);c.fillStyle='#312c39';c.beginPath();c.ellipse(0,4,10,6,0,0,7);c.fill();c.fillStyle=p.color;c.fillRect(-6,-3,12,12);c.fillStyle='#e4b08a';c.beginPath();c.arc(0,-7,5,0,7);c.fill();c.fillStyle='#f2cf75';c.fillRect(-6,-11,12,3);c.fillStyle='#383740';c.fillRect(5,-2,10,3);c.restore()}
+function drawCop(c,p){c.save();c.translate(p.x,p.y);c.rotate(p.a||0);c.fillStyle='#263e59';c.beginPath();c.ellipse(0,3,9,6,0,0,7);c.fill();c.fillRect(-5,-4,10,13);c.fillStyle='#e8b28c';c.beginPath();c.arc(0,-8,4,0,7);c.fill();c.fillStyle='#f0d78e';c.fillRect(-5,-13,10,3);c.fillStyle='#202d36';c.fillRect(4,-2,9,3);c.restore()}
